@@ -1,0 +1,19 @@
+# --- Dependencies (Recursive) ---
+**/node_modules/
+**/__pycache__/
+**/venv/
+**/env/
+**/.env
+
+# --- Heavy AI Models (Recursive) ---
+**/*.pth
+**/*.pkl
+**/*.h5
+**/models/
+**/dataset/
+**/standardized_images/
+
+# --- IDE Files ---
+.vscode/
+.idea/
+.DS_Store
