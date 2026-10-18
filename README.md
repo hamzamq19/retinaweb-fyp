@@ -9,15 +9,10 @@
 
 ## 📋 Table of Contents
 - [Overview](#-overview)
-- [System Architecture](#-system-architecture)
-- [Clinical Taxonomy](#-clinical-taxonomy)
 - [Benchmark Results](#-benchmark-results)
 - [Dataset & Integrity Pipeline](#-dataset--integrity-pipeline)
-- [Repository Structure](#-repository-structure)
 - [Getting Started](#-getting-started)
-- [Authors & Citation](#-authors--citation)
 
----
 
 ## 💡 Overview
 
@@ -28,52 +23,6 @@ RETINAWEB is designed to assist clinical workflows by rapidly triaging fundus ph
 * **Leakage-Proof Data Integrity:** Implemented patient regex grouping paired with a ResNet-18 feature extraction and cosine similarity audit to eliminate patient cross-contamination between train/val/test splits.
 * **Heterogeneous Model Stacking:** Combined 5 distinct vision architectures (ResNet-50, DenseNet-121, EfficientNet-B3, ConvNeXt-Tiny, Swin-Tiny) through a Logistic Regression meta-learner.
 * **Empirical Performance:** Achieved **Macro F1 = 0.8845**, **Mean AUC = 0.9888**, and **mAP = 0.9398** across 826 held-out clinical test images.
-
----
-
-## 🏗️ System Architecture
-
-                 Fundus Image Input
-                         │
-                         ▼
-┌─────────────────────────────────────────────────┐
-│               PREPROCESSING PIPELINE            │
-│   Grayscale → Otsu Threshold → Auto-Crop        │
-│   → 500×500 Bilinear Resize → Circular Masking  │
-└────────────────────────┬────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────┐
-│             TEST-TIME AUGMENTATION (TTA)        │
-│      Original + Horizontal Flip + Vertical Flip │
-│             → Probability Averaging             │
-└────────────────────────┬────────────────────────┘
-                         │
-        ┌────────────────┼────────────────┐
-        ▼                ▼                ▼
-   ResNet-50       DenseNet-121     EfficientNet-B3   ... [ConvNeXt-Tiny, Swin-Tiny]
-   (11 probs)       (11 probs)         (11 probs)
-        └────────────────┬────────────────┘
-                         │
-                         ▼ (55-Dimensional Feature Vector)
-┌─────────────────────────────────────────────────┐
-│             STACKING META-LEARNER               │
-│      11 Independent Logistic Regression Heads   │
-│           (L2 Regularised, Class-Balanced)      │
-└────────────────────────┬────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────┐
-│           OPTIMISED THRESHOLD CUTOFFS           │
-│     Individually tuned per-class thresholds     │
-│        maximising F1 on validation split        │
-└────────────────────────┬────────────────────────┘
-                         │
-                         ▼
-                 FINAL DIAGNOSIS
-     Multi-label report + Grad-CAM Heatmaps
-
-
 
 ## 🏷️ Clinical Taxonomy
 
@@ -91,7 +40,6 @@ RETINAWEB is designed to assist clinical workflows by rapidly triaging fundus ph
 | **BRVO** | Branch Retinal Vein Occlusion | Flame-shaped hemorrhages along tributary retinal veins |
 | **LS** | Laser Scars | Photocoagulation chorioretinal scarring |
 
----
 
 ## 📊 Benchmark Results
 
@@ -144,27 +92,6 @@ Evaluated on $n = 826$ held-out test scans:
 
 
 
----
-
-## 📂 Repository Structure
-
-retinaweb-fyp/
-├── backend/
-│   ├── main.py                         # FastAPI application and inference worker
-│   ├── models/
-│   │   ├── final_meta_model.pkl        # Stacking LR meta-learner
-│   │   ├── *_thresholds.txt            # Per-class decision boundaries
-│   │   └── *.pth                       # PyTorch weights (see Weights section)
-│   └── requirements.txt                # Backend dependencies
-├── retinaweb/                          # React client application (Vite + Tailwind)
-│   ├── src/
-│   ├── package.json
-│   └── vite.config.js
-├── data_pipeline/                      # Standardization, split, and audit scripts
-├── training/                           # Model-specific PyTorch training routines
-└── README.md
-
-
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -211,9 +138,3 @@ Open `http://localhost:5173` in your browser.
 ## 👥 Authors & Academic Citation
 
 * **Hamza Mustafa** — KIET, Karachi ([GitHub](https://github.com/hamzamq19) • [LinkedIn](https://www.google.com/search?q=https://www.linkedin.com/in/hamzamq))
-
-```
-
-Just remember to replace `INSERT_YOUR_GOOGLE_DRIVE_LINK_HERE` in the "Model Checkpoints" section with your actual Google Drive URL before or right after you commit this to your repository.
-
-```
